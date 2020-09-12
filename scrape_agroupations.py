@@ -12,7 +12,7 @@ import 				os
 import 				wget
 import 				requests
 #	Base de datos
-client  			= 	MongoClient('localhost', 27017)
+client  			= 	MongoClient('mongodb://espinosa012:google8ARE@cluster0-shard-00-00.jeh7t.mongodb.net:27017,cluster0-shard-00-01.jeh7t.mongodb.net:27017,cluster0-shard-00-02.jeh7t.mongodb.net:27017/betshit4?ssl=true&replicaSet=atlas-72aj66-shard-0&authSource=admin&retryWrites=true&w=majority', 27017)
 momodb				=	client.momodb
 agroupations		=	momodb.agroupations
 agroupations_		=	momodb.agroupations_
@@ -46,7 +46,6 @@ def get_agroupation(id_):
 	except:
 		raise Exception('Agroupation {} not found'.format(id_))
 
-
 	basic_info 				=	soup.find_all('div',{'class':'card-body'})[0].find_all('div', {'class':'form-group'})
 
 	#	Basic info
@@ -55,28 +54,15 @@ def get_agroupation(id_):
 	agroupation['cal'] 		= 	basic_info[2].find('label', {'class':'form-control'}).string.strip().title()
 	try:
 		agroupation['origin'] 	= 	basic_info[3].find('label', {'class':'form-control'}).string.strip()
-	except:
-		pass
-	agroupation['tipo'] 	= 	basic_info[4].find('label', {'class':'form-control'}).string.strip()
-	try:
+		agroupation['tipo'] 	= 	basic_info[4].find('label', {'class':'form-control'}).string.strip()
 		agroupation['previous']	= 	int(basic_info[5].find('a')['href'].split('/')[-2])
 	except:
 		pass
 
-	'''
-	print(agroupation)
-	print(authors_components.find_all('div', {'class':'media-body'}))
-	input()
+	agroupation['authors']		=	scrape_authors(id_)
+	agroupation['components']	=	scrape_components(id_)
 
-	#	Obtenemos los componentes
-	for ac in authors_components.find_all('div', {'class':'media-body'}):
-		id_ 	=	ac.find('a')['href'].split('/')[-2]
-		role	=	ac.find('li').string.strip()
-		agroupation['authors_components'][id_]	=	role
-
-	agroupations_.insert_one(agroupation)
-	print(agroupation['name'])
-	'''
+	
 	return agroupation
 
 
@@ -147,18 +133,13 @@ def scrape_components(id_):
 	components_roles 	=	 ['Guitarra', 'Dirección', 'Caja', 'Bombo', 'Componente']
 	for c in components:
 		role	=	c.find('li').string.strip()
-
 		for cr in components_roles:
 			if cr in role:
 				components_list.append({
 					'id_':c.find('a')['href'].split('/')[-2], 
 					'role':role
 				})
-
-
-
 	#	Devuelve una lista de diccionarios {'id_':comp_id, 'role':comp_role}
-
 	return components_list
 
 

@@ -1,17 +1,17 @@
-from    selenium                            import webdriver
-from    selenium.webdriver.support.wait     import WebDriverWait
-from    selenium.webdriver.chrome.options   import Options
-from 	selenium.webdriver.common.keys 		import Keys
-from 	selenium.webdriver.common.proxy 	import Proxy, ProxyType
-from 	selenium.webdriver.support 		import 	expected_conditions as EC 	# available since 2.26.0
-from 	selenium.webdriver.support.ui 	import WebDriverWait
-from 	selenium.webdriver.common.by 	import 	By
-from 	selenium.webdriver.support.ui 	import 	WebDriverWait 				# available since 2.timeout.0
-from 	selenium.webdriver.support 		import 	expected_conditions as EC 
-from urllib.request import 	urlopen 
-from urllib.error 	import 	HTTPError
-from bs4 			import 	BeautifulSoup
-from pymongo 		import	MongoClient
+from    selenium                            import 	webdriver
+from    selenium.webdriver.support.wait     import 	WebDriverWait
+from    selenium.webdriver.chrome.options   import 	Options
+from 	selenium.webdriver.common.keys 		import 	Keys
+from 	selenium.webdriver.common.proxy 	import 	Proxy, ProxyType
+from 	selenium.webdriver.support 			import 	expected_conditions as EC 	# available since 2.26.0
+from 	selenium.webdriver.support.ui 		import 	WebDriverWait
+from 	selenium.webdriver.common.by 		import 	By
+from 	selenium.webdriver.support.ui 		import 	WebDriverWait 				# available since 2.timeout.0
+from 	selenium.webdriver.support 			import 	expected_conditions as EC 
+from 	urllib.request 						import 	urlopen 
+from 	urllib.error 						import 	HTTPError
+from 	bs4 								import 	BeautifulSoup
+from 	pymongo 							import	MongoClient
 
 import 				os
 import 				wget
@@ -197,5 +197,3 @@ def get_remaining_authors():
 		
 
 rescrape_with_selenium()
-#7266 (ultimo autor)
-#src="https://www.elbuscadordelfalla.com/documentos/autores/emilio-santander-cahue.jpg"
