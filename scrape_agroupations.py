@@ -1,29 +1,19 @@
-from urllib.request import urlopen 
-from urllib.error 	import HTTPError
-from bs4 			import BeautifulSoup
-from pymongo 		import	MongoClient
-
-from urllib.request import 	urlopen 
-from urllib.error 	import 	HTTPError
-from bs4 			import 	BeautifulSoup
-from pymongo 		import	MongoClient
-
 import 				os
 import 				wget
-import 				requests
-#	Base de datos
-client  			= 	MongoClient('localhost', 27017)
-momodb				=	client.momodb
-agroupations		=	momodb.agroupations
-agroupations_		=	momodb.agroupations_
-authors_components	=	momodb.authors_components
-	
 
-def get_agroupation(id_):
+from urllib.request import urlopen 
+from bs4 			import BeautifulSoup
+from pymongo 		import MongoClient
+
+def get_soup(id_):
 	url 	=	'http://elbuscadordelfalla.com/CarnavalCadiz/Agrupacion/{}/'.format(id_)
 	# 	BeautifulSoap
 	ebdf 	=	urlopen(url)
-	soup 	=	BeautifulSoup(ebdf, 'html.parser')
+	return BeautifulSoup(ebdf, 'html.parser')
+
+
+def get_agroupation(id_):
+	soup 	= 	get_soup(id_)
 
 	agroupation 	=	{
 		'id_'				:id_,
@@ -59,51 +49,21 @@ def get_agroupation(id_):
 	except:
 		pass
 
-	agroupation['authors']		=	scrape_authors(id_)
-	agroupation['components']	=	scrape_components(id_)
-
+	agroupation['authors']		=	scrape_authors(id_, soup)
+	agroupation['components']	=	scrape_components(id_, soup)
 	
+	#	Algunas agrupaciones no tienen imágenes
+	try:
+		agroupation['img']			= 	get_agroupation_image_url(soup)
+	except:
+		pass
 	return agroupation
 
 
-
-def get_soup(id_):
-	url 	=	'http://elbuscadordelfalla.com/CarnavalCadiz/Agrupacion/{}/'.format(id_)
-	# 	BeautifulSoap
-	ebdf 	=	urlopen(url)
-	return BeautifulSoup(ebdf, 'html.parser')
-
-
-
-
-
-def set_agroupation_authors():
-	for ag in agroupations_.find():
-		try:
-			authors 	=	scrape_authors(ag['id_'])
-			agroupations_.update_one({'id_':ag['id_']}, {'$set':{'authors':authors}})
-		except:
-			print('Authors error: ', ag['id_'])
-
-
-
-
-def set_agroupations_components():
-	for ag in agroupations_.find():
-		try:
-			components 	=	scrape_components(ag['id_'])
-			agroupations_.update_one({'id_':ag['id_']}, {'$set':{'components':components}})
-		except:
-			print('Compnents error: ', ag['id_'])
-
-
-
-def scrape_authors(id_):
+def scrape_authors(id_, soup):
 	authors_list=	[]
 
-	soup 		=	get_soup(id_)
 	components 	=	soup.find_all('div',{'class':'card-body'})[1].find_all('div', {'class':'media-body'})
-
 	authors_roles 	=	['Letra', 'Música']
 	for c in components:
 		role	=	c.find('li').string.strip()
@@ -120,16 +80,10 @@ def scrape_authors(id_):
 
 
 
-def scrape_components(id_):
+def scrape_components(id_, soup):
 	components_list 	=	[]
 
-	url 	=	'http://elbuscadordelfalla.com/CarnavalCadiz/Agrupacion/{}/'.format(id_)
-	# 	BeautifulSoap
-	ebdf 	=	urlopen(url)
-	soup 	=	BeautifulSoup(ebdf, 'html.parser')
-
 	components 			=	soup.find_all('div',{'class':'card-body'})[1].find_all('div', {'class':'media-body'})
-
 	components_roles 	=	 ['Guitarra', 'Dirección', 'Caja', 'Bombo', 'Componente']
 	for c in components:
 		role	=	c.find('li').string.strip()
@@ -143,139 +97,33 @@ def scrape_components(id_):
 	return components_list
 
 
+def get_agroupation_image_url(soup):
+		img_src	=	soup.findAll('div', {'class':'col-md-6'})[1].find('img')['src']
+		return 'https://www.elbuscadordelfalla.com{}'.format(img_src)
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def get_agroupation_image(id_):
-	url 	=	'http://elbuscadordelfalla.com/CarnavalCadiz/Agrupacion/{}/'.format(id_)
-	ebdf 	=	urlopen(url)
-	soup 	=	BeautifulSoup(ebdf, 'html.parser')
-
-	try:
-		agroupation 	=	agroupations_.find_one({'id_':id_})
-	except:
-		raise Exception('agroupation not found in collection')
-
-	try:
-		#	Obtenemos la imagen del sitio web
-		img_src 	=	soup.findAll('div', {'class':'col-md-6'})[1].find('img')['src']
-		#img_src 	=	'https://www.elbuscadordelfalla.com{}'.format(soup.find('div', {'class':'container body-content'}).find('img')['src'])	
-		download_agroupation_image(img_src, id_)
-		agroupation['img']			=	True		
-	except Exception as e:
-		if 'no_image' == str(e):
-			agroupation['img'] 	=	False
-		else:
-			raise Exception('Exception downloading image for author: {}'.format(id_))
-
-
-def download_agroupation_image(img_src, id_):
-	image_url 	=	'https://elbuscadordelfalla.com{}'.format(img_src)
-	directory 	= 	os.path.join('../img/agroupations/', '{}.jpg'.format(id_))
-	if 'sin_imagen' not in img_src:
-		wget.download(image_url, directory, bar=None)
+def download_agroupation_image(img_url, id_, img_path='.'):
+	#	img_path: ruta donde se descargará la imagen
+	#	img_url: valor del campo imagen del documento agroupation
+	#	El nombre del fichero de imagen será el campo id_ del documento agroupation
+	directory 	= 	os.path.join(img_path, '{}.jpg'.format(id_))
+	if 'sin_imagen' not in img_url:
+		wget.download(img_url, directory, bar=None)
 	else:
-		raise Exception('no_image')
+		raise Exception('No se pudo descargar la imagen (id_: {})'.format(id_))
 
 
 
-def complete_database():
-	#	Obtenemos las ids del fichero
-	ids 	=	get_remaining_agroupations()
 
-	#	Buscamos documento en la antigua base de datos
-	for id_ in ids:
-		try:
-			try:
-				old 	=	agroupations.find_one({'id_':str(id_)})
-			except:
-				raise Exception('agroupation not found in old db: {}'.format(id_))
-				
-			print(old['name'], old['year'])
+def save_agroupation(agroupation):
+	#	Recibe un diccionario con la información de la agrupación y lo almacena en una base de datos Mongo en el servidor local (necesita MongoDB para funcionar)
+	client  			= 	MongoClient('localhost', 27017)
+	agroupations_coll	=	client.momodb.agroupations
 
-			old['id_']		=	int(old['id_'])
-			old['image']	=	False
-
-			try:
-				agroupations_.insert_one(old)
-			except:
-				raise Exception('error inserting doc in new collection')
-
-		except Exception as e:
-			print(e)
-
-
-def get_remaining_agroupations():
-	file 	=	open('agrerror.txt', 'r')
-	lines 	=	file.readlines()
-	ids 	=	[]
-	for line in lines:
-		ids.append(int(line.split(':')[1].strip()))
-
-	return ids
-
-
-def set_images():	
-
-	for ag in agroupations_.find():
-		img 	=	ag['image']
-		if img:
-			pass
-		else:
-			try:
-				print('getting image for: {}'.format(ag['id_']))
-				get_agroupation_image(ag['id_'])
-			except Exception as e:
-				print('error ({}) : {}'.format(ag['id_'], e))
-			
-	'''
 	try:
-		get_agroupation_image(ag['id_'])
-	except:
-		print('error: {}'.format(ag['id_']))
-	'''	
-	
+		agroupations_coll.insert_one(agroupation)
+	except Exception as e:
+		print('No se puedo guardar en base de datos la agrupación con id {}'.format(agroupation['id_']))
 
-def fill_db():
-	#	Agroupations
-	for i in range(1307, 8000):
-		try:
-			agroupations_.insert_one(get_agroupation(i))
-		except:
-			print('Error: ', i)
-
-
-
-set_agroupation_authors()
-
-#set_images()
-
-'''
-	for it in os.listdir('../img/agroupations/'):
-		try:
-			id_ 	=	int(it.split('.')[0])
-			ag 		= agroupations_.find_one({'id_':id_})
-			if not ag['image']:
-				agroupations_.update_one({'id_':id_}, {'$set':{'image':True}})
-				print(ag['name'], ag['image'])
-		except Exception as e:
-			#print('error: {}'.format(ag['id_']))
-			print('error: {}'.format(e))
-
-	'''
-#agr img: vamos por 6906 
