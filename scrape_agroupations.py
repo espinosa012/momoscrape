@@ -12,7 +12,7 @@ import 				os
 import 				wget
 import 				requests
 #	Base de datos
-client  			= 	MongoClient('mongodb://espinosa012:google8ARE@cluster0-shard-00-00.jeh7t.mongodb.net:27017,cluster0-shard-00-01.jeh7t.mongodb.net:27017,cluster0-shard-00-02.jeh7t.mongodb.net:27017/betshit4?ssl=true&replicaSet=atlas-72aj66-shard-0&authSource=admin&retryWrites=true&w=majority', 27017)
+client  			= 	MongoClient('localhost', 27017)
 momodb				=	client.momodb
 agroupations		=	momodb.agroupations
 agroupations_		=	momodb.agroupations_
