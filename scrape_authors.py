@@ -5,13 +5,6 @@ from 	urllib.request 						import 	urlopen
 from 	bs4 								import 	BeautifulSoup
 from 	pymongo 							import	MongoClient
 
-#	Base de datos
-client  			= 	MongoClient('localhost', 27017)
-momodb				=	client.momodb
-agroupations		=	momodb.agroupations
-authors_components	=	momodb.authors_components
-
-
 def get_soup(id_):
 	url 	=	'http://elbuscadordelfalla.com/CarnavalCadiz/Autor/{}/'.format(id_)
 	# 	BeautifulSoap
