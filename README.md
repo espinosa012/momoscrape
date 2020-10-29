@@ -31,7 +31,7 @@ documentos de autor/componente es el siguiente:
 Por último, en database.py, se implementa un script para formar una base de datos mongo en el servidor local con toda la información, 
 tanto de agrupaciones como de autores/componentes.
 
-Hasta el momento, sólo se forma un base de datos mongo, aunque en el futuro se añadirá la funcionalidad para formar una base sql.
+Hasta el momento, sólo se forma un base de datos mongo, aunque en el futuro se añadirá la funcionalidad para formar una base de datos sql.
 
 La posible utilidad de esta herramienta radica en la posibiilidad de utilizar esta base de datos para ser consumida por alguna API o
 cualquier otra aplicación de cualquier tipo.
