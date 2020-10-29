@@ -1,5 +1,5 @@
 #   momoscrape
-Se trata de varios scripts escritos en python con una serie de funciones implementadas con el fin de formar una base de datos de
+Momoscrape es un conjunto de varios scripts escritos en python con una serie de funciones implementadas con el fin de formar una base de datos de
 agrupaciones, autores y componentes del Carnaval de Cádiz. Para ello, se emplean técnicas de web scraping, accediendo al sitio 
 [El Buscador del Falla](https://www.elbuscadordelfalla.com/Home/Index), posiblemente el sitio web más completo sobre el Carnaval de 
 Cádiz y que ofrece una base de datos de acceso libre y gratuito, así como una serie de artículos, tanto históricos como de actualidad.
